@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動地震學教室 - 基礎與震源機制</title>
+    <style>
+        :root {
+            --primary-color: #1a365d;
+            --secondary-color: #2b6cb0;
+            --background-color: #f7fafc;
+            --card-background: #ffffff;
+            --text-color: #2d3748;
+            --success-color: #48bb78;
+            --error-color: #f56565;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif, "Microsoft JhengHei";
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .quiz-card {
+            background: var(--card-background);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border-left: 5px solid var(--secondary-color);
+        }
+
+        .question {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .option-btn {
+            background-color: #edf2f7;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: left;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .option-btn:hover {
+            background-color: #e2e8f0;
+            border-color: #cbd5e0;
+        }
+
+        .explanation {
+            display: none;
+            background-color: #f0fff4;
+            border: 1px solid #c6f6d5;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+
+        .explanation.wrong {
+            background-color: #fff5f5;
+            border-color: #fed7d7;
+        }
+
+        .explanation-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .explanation-title.correct { color: var(--success-color); }
+        .explanation-title.incorrect { color: var(--error-color); }
+
+        /* 動畫與 SVG 樣式 */
+        .animation-box {
+            background-color: #f8fafc;
+            border: 1px dashed #cbd5e0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        /* P波疏密波路徑動畫 */
+        @keyframes pWaveAnim {
+            0% { transform: translateX(0px); }
+            50% { transform: translateX(15px); }
+            100% { transform: translateX(0px); }
+        }
+        .p-particle {
+            animation: pWaveAnim 1s infinite ease-in-out;
+        }
+
+        /* S波剪力波剪切動畫 */
+        @keyframes sWaveAnim {
+            0% { transform: translateY(0px); }
+            25% { transform: translateY(-10px); }
+            75% { transform: translateY(10px); }
+            100% { transform: translateY(0px); }
+        }
+        .s-particle {
+            animation: sWaveAnim 1.5s infinite ease-in-out;
+        }
+
+        /* 彈性回跳動畫 */
+        @keyframes elasticRebound {
+            0% { transform: skewX(0deg); }
+            40% { transform: skewX(10deg); }
+            45% { transform: skewX(0deg); offset: 0; }
+            100% { transform: skewX(0deg); }
+        }
+        .fault-block {
+            animation: elasticRebound 4s infinite linear;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>模擬地震學互動問答教室</h1>
+        <p>跟著地震學導師一起由淺入深，探索地底下的秘密吧！</p>
+    </header>
+
+    <div class="quiz-card" id="q1">
+        <div class="question">主題一：當地震發生時，哪一種波會最先抵達地震測站？</div>
+        <div class="options">
+            <button class="option-btn" onclick="checkAnswer(1, 'A', true)">(A) P波 (Primary Wave)</button>
+            <button class="option-btn" onclick="checkAnswer(1, 'B', false)">(B) S波 (Secondary Wave)</button>
+            <button class="option-btn" onclick="checkAnswer(1, 'C', false)">(C) 表面波 (Surface Wave)</button>
+        </div>
+        <div class="explanation" id="exp1"></div>
+    </div>
+
+    <div class="quiz-card" id="q2">
+        <div class="question">主題二：根據 H. Reid 提出的「彈性回跳理論」，地震能量是如何累積的？</div>
+        <div class="options">
+            <button class="option-btn" onclick="checkAnswer(2, 'A', false)">(A) 地底岩漿劇烈燃燒，推擠岩石</button>
+            <button class="option-btn" onclick="checkAnswer(2, 'B', true)">(B) 斷層受到板塊擠壓而鎖定，岩石像彈簧一樣逐漸累積應變</button>
+            <button class="option-btn" onclick="checkAnswer(2, 'C', false)">(C) 地底下的空洞崩塌引發震動</button>
+        </div>
+        <div class="explanation" id="exp2"></div>
+    </div>
+
+    <div class="quiz-card" id="q3">
+        <div class="question">主題三：在震源機制分析中，被形象地稱為「沙灘球 (Beachball)」的圖形是用來表示什麼？</div>
+        <div class="options">
+            <button class="option-btn" onclick="checkAnswer(3, 'A', false)">(A) 地震波在海灘上的傳播速度</button>
+            <button class="option-btn" onclick="checkAnswer(3, 'B', false)">(B) 海嘯波浪的高度與範圍</button>
+            <button class="option-btn" onclick="checkAnswer(3, 'C', true)">(C) 斷層的空間幾何形狀（走向、傾角）與受力型態</button>
+        </div>
+        <div class="explanation" id="exp3"></div>
+    </div>
+</div>
+
+<script>
+function checkAnswer(quizNum, choice, isCorrect) {
+    const expDiv = document.getElementById('exp' + quizNum);
+    expDiv.style.display = 'block';
+    
+    if (isCorrect) {
+        expDiv.className = 'explanation';
+        let htmlContent = `<div class="explanation-title correct">🎉 答對了！導師為你點讚！</div>`;
+        
+        if (quizNum === 1) {
+            htmlContent += `
+                <p><strong>說明：</strong>P波是「縱波」（疏密波），傳播速度最快。生活中的例子就像<strong>拉動彈簧</strong>，振動方向和前進方向是一致的，所以它會第一個衝到終點！</p>
+                <div class="animation-box">
+                    <p>💡 <strong>P波模擬小動畫：</strong>（粒子左右擠壓前進）</p>
+                    <svg width="200" height="40">
+                        <circle class="p-particle" cx="30" cy="20" r="8" fill="#2b6cb0" style="animation-delay: 0s;"/>
+                        <circle class="p-particle" cx="70" cy="20" r="8" fill="#2b6cb0" style="animation-delay: 0.1s;"/>
+                        <circle class="p-particle" cx="110" cy="20" r="8" fill="#2b6cb0" style="animation-delay: 0.2s;"/>
+                        <circle class="p-particle" cx="150" cy="20" r="8" fill="#2b6cb0" style="animation-delay: 0.3s;"/>
+                    </svg>
+                </div>`;
+        } else if (quizNum === 2) {
+            htmlContent += `
+                <p><strong>說明：</strong>岩石在斷層兩側因為強大的摩擦力而「鎖定」。這就像你<strong>用力拉一條粗橡皮筋</strong>，它會不斷變形累積能量，當你拉到超過橡皮筋的強度時，它就會突然斷裂並彈回原狀，這就是地震爆發的瞬間！</p>
+                <div class="animation-box">
+                    <p>💡 <strong>彈性回跳模擬：</strong>（緩慢變形後突然彈回釋放）</p>
+                    <svg width="200" height="60">
+                        <rect class="fault-block" x="50" y="10" width="100" height="40" fill="#a0aec0" stroke="#4a5568" stroke-width="2"/>
+                        <line x1="100" y1="10" x2="100" y2="50" stroke="#e53e3e" stroke-width="3" stroke-dasharray="4"/>
+                    </svg>
+                </div>`;
+        } else if (quizNum === 3) {
+            htmlContent += `
+                <p><strong>說明：</strong>「沙灘球」是透過立體投影法，將地震儀記錄到的 P 波初動極性（壓縮或擴張）畫在震源球上。透過黑色與白色的區塊分布，科學家一眼就能看出這是正斷層、逆斷層還是平移斷層！</p>
+                <div class="animation-box">
+                    <p>💡 <strong>走向滑移斷層的沙灘球特徵：</strong></p>
+                    <svg width="80" height="80" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="45" fill="none" stroke="#2d3748" stroke-width="2"/>
+                        <path d="M 50,5 A 45,45 0 0,1 95,50 L 50,50 Z" fill="#2d3748"/>
+                        <path d="M 50,95 A 45,45 0 0,1 5,50 L 50,50 Z" fill="#2d3748"/>
+                    </svg>
+                </div>`;
+        }
+        expDiv.innerHTML = htmlContent;
+    } else {
+        expDiv.className = 'explanation wrong';
+        expDiv.innerHTML = `<div class="explanation-title incorrect">❌ 哎呀，差一點點！再想想看。</div>
+        <p>別灰心！可以試著從岩石的物理特性或是波的傳播速度快慢去切入思考喔！</p>`;
+    }
+}
+</script>
+
+</body>
+</html>
